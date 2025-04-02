@@ -7,14 +7,11 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import END, START, StateGraph
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from utils.llm_usage import get_llm
 from utils.process_json import process_weather_json
-from utils.logger import setup_logging
 from utils.choose_state import State, GradeDocuments
 from utils.prompt import (
     INSTRUCTIONRAGGRADE,

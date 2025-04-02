@@ -36,7 +36,7 @@ The Weather JSON Agent implements a sophisticated workflow using LangGraph:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/weather_json_agent.git
+git clone https://github.com/Chrisliao0806/weather_json_agent.git
 cd weather_json_agent
 
 # Install dependencies

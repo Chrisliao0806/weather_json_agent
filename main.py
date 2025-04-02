@@ -39,9 +39,25 @@ if __name__ == "__main__":
     # Set up logging
     setup_logging(log_level=args.log_level, log_filename="./logs/weather_agent.log")
     # Initialize the WeatherAgent
+    history_list = []
+    logging.info("Initializing WeatherAgent...")
     agent = WeatherAgent(
         file_path=args.file_path, use_local_llm=args.use_local_llm
     )
     # Run the agent with the specified parameters
     output, token = agent.workflow(query=args.question)
     print(output['generation'])
+    logging.info("Weather agent workflow completed.")
+    history_list.append([{"role": "user", "content": args.question}])
+    history_list.append([{"role": "assistant", "content": output['generation']}])
+    print(history_list)
+    logging.info("History list updated.")
+    for i in range(10):
+        input_question = input("請輸入問題：")
+        output, token = agent.workflow(query=input_question, history=history_list)
+        print(output['generation'])
+        logging.info("Weather agent workflow completed.")
+        history_list.append([{"role": "user", "content": input_question}])
+        history_list.append([{"role": "assistant", "content": output['generation']}])
+        print(history_list)
+        logging.info("History list updated.")

@@ -96,6 +96,7 @@ class WeatherAgent:
             [
                 ("system", INSTRUCTIONRAG),
                 ("system", "文件: \n\n {documents}"),
+                ("system", "歷史紀錄: \n\n {history}"),
                 ("human", "問題: {question}"),
             ]
         )
@@ -103,6 +104,7 @@ class WeatherAgent:
         prompt_plain = ChatPromptTemplate.from_messages(
             [
                 ("system", INSTRUCTIONPLAIN),
+                ("system", "歷史紀錄: \n\n {history}"),
                 ("human", "問題: {question}"),
             ]
         )
@@ -305,9 +307,10 @@ class WeatherAgent:
         print("---GENERATE IN RAG MODE---")
         question = state["question"]
         documents = state["documents"]
+        history = state["chat_history"]
         # RAG generation
         generation = self.rag_chain.invoke(
-            {"documents": documents, "question": question}
+            {"documents": documents, "question": question, "history": history}
         )
         return {"documents": documents, "question": question, "generation": generation}
 
@@ -330,11 +333,12 @@ class WeatherAgent:
         """
         print("---GENERATE IN PLAIN MODE---")
         question = state["question"]
+        history = state["chat_history"]
         # Plain generation
-        generation = self.llm_chain.invoke({"question": question})
+        generation = self.llm_chain.invoke({"question": question, "history": history})
         return {"question": question, "generation": generation}
 
-    def workflow(self, query):
+    def workflow(self, query, history=None):
         """
         Executes the workflow for processing a query using a state graph.
 
@@ -360,6 +364,8 @@ class WeatherAgent:
                     - Completion tokens used.
         """
         token = []
+        if not history:
+            history = [{"role": "assistant", "content": "no history"}]
         workflow = StateGraph(State)
         workflow.add_node("retrieve", self.retrieve)  # retrieve
         workflow.add_node("grade_documents", self.retrieval_grade)  # grade documents
@@ -380,7 +386,7 @@ class WeatherAgent:
         compiled_app = workflow.compile()
 
         with get_openai_callback() as cb:
-            output = compiled_app.invoke({"question": query})
+            output = compiled_app.invoke({"question": query, "chat_history": history})
             token.append(cb.total_tokens)
             token.append(cb.prompt_tokens)
             token.append(cb.completion_tokens)
